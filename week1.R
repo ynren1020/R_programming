@@ -30,4 +30,25 @@ good <- complete.cases(x, y) # subset multiple objects or data frame to subset N
 x * y # element multiplication of two matrix
 x %*% y # true matrix multiplication
 
+# hw1
+hw1 <- read.csv("hw1_data.csv")
+print(hw1[1:2,])
+print(hw1[152:153,])
+hw1[47,]
+
+sum(is.na(hw1$Ozone))
+
+mean(na.omit(hw1$Ozone))
+
+mean(hw1[hw1$Ozone>31&hw1$Temp>90, "Solar.R"], na.rm = TRUE)
+
+mean(hw1[hw1$Month==6,"Temp"], na.rm = TRUE)
+
+max(hw1[hw1$Month==5,"Ozone"], na.rm = TRUE)
+
+
+
+
+
+
 
