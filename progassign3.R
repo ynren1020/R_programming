@@ -131,35 +131,30 @@ rankall <- function(sick, num = "best") {
     ## For each state, find the hospital of the given rank
     out.sub <- out.sub[order(out.sub$State, out.sub$mortality, out.sub$Hospital.Name), ]
     out.sub$Rank <- NULL
-    out.sub$Rank.bw <- NULL
+    #out.sub$Rank.bw <- NULL
     state <- unique(out.sub$State)
+    best.hospital <- vector(mode = "list", length = length(state))
     for (s in state){
         out.sub[out.sub$State==s,"Rank"] <- 1:nrow(out.sub[out.sub$State==s,])
-        out.sub[out.sub$State==s&out.sub$Rank==1,"Rank.bw"] <- "best"
-        out.sub[out.sub$State==s&out.sub[out.sub$State==s,"Rank"] == nrow(out.sub[out.sub$State==s,])]
         
-        if (out.sub[out.sub$State==s,"Rank"] == 1) {out.sub[out.sub$State==s,"Rank.bw"] <- "best"
-        } else if (out.sub[out.sub$State==s,"Rank"] == nrow(out.sub[out.sub$State==s,])){
-            out.sub[out.sub$State==s,"Rank.bw"] <- "worst"
-        } else {out.sub[out.sub$State==s,"Rank.bw"] <- "middle"}
+        if (num == "best") {best.hospital[[s]] <- out.sub[out.sub$State==s&out.sub$Rank == 1, c("Hospital.Name", "State")]
+        } else if (num == "worst") {best.hospital[[s]] <- out.sub[out.sub$State==s&out.sub$Rank == nrow(out.sub[out.sub$State==s,]), c("Hospital.Name", "State")]
+        } else {
+            best.hospital[[s]] <- out.sub[which(out.sub$Rank == num), c("Hospital.Name", "State")]
+        }
+        
     }
-    head(out.sub)
-    # subset by rank---
-    if (num == "best") {best.hospital <- out.sub[which(out.sub$Rank.bw == "best"), c("Hospital.Name", "State")]
-    } else if (num == "worst") {best.hospital <- out.sub[which(out.sub$Rank.bw == "worst"), c("Hospital.Name", "State")]
-    } else {
-        best.hospital <- out.sub[which(out.sub$Rank == num), c("Hospital.Name", "State")]
-    }
+    best.hospital.join <- do.call(rbind, best.hospital)
+    names(best.hospital.join) <- c("hospital", "state")
+    best.hospital.join <- best.hospital.join[order(best.hospital.join$state),]
     
-    names(best.hospital) <- c("hospital", "state")
-    
-    if (length(best.hospital$state) < length(state)) {
-        best.hospital.sub <- data.frame(hospital = NA, state = setdiff(state, best.hospital$state))
-        best.hospital.final <- rbind(best.hospital, best.hospital.sub)
+    if (length(best.hospital.join$state) < length(state)) {
+        best.hospital.sub <- data.frame(hospital = NA, state = setdiff(state, best.hospital.join$state))
+        best.hospital.final <- rbind(best.hospital.join, best.hospital.sub)
         best.hospital.final <- best.hospital.final[order(best.hospital.final$state),]
         return(best.hospital.final)
     } else {
-        return(best.hospital)
+        return(best.hospital.join)
     }
     
     
